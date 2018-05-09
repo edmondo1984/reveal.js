@@ -3,15 +3,12 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 		<title>reveal.js</title>
-
 		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/kafka.css">
 		<link rel="stylesheet" href="css/theme/black.css">
-
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
-
 		<!-- Printing and PDF exports -->
 		<script>
 			var link = document.createElement( 'link' );
@@ -24,14 +21,171 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<section>
+						<h2>Kafka Connect in Practice</h2>
+						<p>@edmondo1984</p>
+						<p class="credimi-color">Edmondo Porcu</p>
+						<p class="credimi-color">edmondo@credimi.com</p>
+					</section>
+					<section>
+						<h2>A brief story of Kafka @ <span class="credimi-color">Credimi</span></h2>
+					</section>
+					<section>
+						<p>We love managed services so...</p>
+					</section>
+					<section>
+						<img src="img/kinesis.jpg" class="plain"/>
+					</section>
+					<section>
+						<p>Lesson learned...</p>
+					</section>
+					<section>
+						<img src="img/ecosystem.jpg" class="plain"/>
+					</section>
+					<section>
+						<h2>The Kafka Ecosystem</h2>
+						<ul>
+							<li>Stream processing</li>
+							<li>Hadoop integration</li>
+							<li>Management consoles</li>
+							<li>Logging</li>
+							<li>Metrics</li>
+							<li>Developer tools</li>
+							<li>Much more...</li>
+						</ul>
+						<p><a href="https://cwiki.apache.org/confluence/display/KAFKA/Ecosystem">Confluence WIKI about the Kafka Ecosystem</a></p>
+					</section>
+					<section>
+						<div>
+							<div class="white-background">
+								<img src="img/distribution.png"></img>
+							</div>
+						</div>
+					</section>
+					<section>
+						<h2>Kafka Distributions</h2>
+						<ul>
+							<li class="fragment fade-up">Cloudera</li>
+							<li class="fragment fade-up">Hortonworks</li>
+							<li class="fragment fade-up">IBM Message Hub</li>
+							<li class="fragment fade-up"><span class="credimi-color">Confluent</span></li>
+							
+						</ul>
+					</section>
+					<section>
+						<h2>The Confluent Distribution</h2>
+						<p class="fragment fade-up">Schema registry</p>
+						<p class="fragment fade-up">Rest proxy</p>
+						<p class="fragment fade-up">Kafka Connect</p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h1 class="credimi-color">Tooling matters!</h1>
+					</section>
+					<section>Killer tools -> Fast Data Dev by Landoop
+						<img src="img/fast-data-dev.png" class="fragment"></img>
+					</section>
+					<section>And even better, Lenses
+						<img src="img/lenses.png" class="fragment"></img>
+					</section>
+				</section>
+				<section>
+					<section><h2>Kafka Connect</h2>
+						<p class="fragment"><span class="credimi-color">Standardize </span>interaction with external data-sources</p>
+						<p class="fragment">A <span class="credimi-color">plugin-based</span> architecture with <span class="credimi-color">classloader isolation</span></p>
+						<p class="fragment">A clear and simple <span class="credimi-color">API</span></p>
+					</section>
+					<section>
+						<h2>A look to the most important API concepts</h2>
+						<ul>
+							<li class="fragment fade-up"><span class="credimi-color">Connectors:</span> basically a task factory</li>
+							<li class="fragment fade-up"><span class="credimi-color">Tasks:</span>  implementation of data copy &lt;&gt; kafka</li>
+							<li class="fragment fade-up"><span class="credimi-color">Workers:</span>  they run tasks</li>
+							<li class="fragment fade-up"><span class="credimi-color">Converters:</span>  byte arrays &lt;&gt; Kafka Connect API</li>
+							<li class="fragment fade-up"><span class="credimi-color">Transformers:</span>  configuration-based message transformations</li>
+						</ul>
+					</section>
+					<section>
+						<img src="img/show-me-the-code2.jpg" class="plain margin-bottom"/>
+					</section>
+					<section>
+						<h4>Connectors: <span class="api">API</span>, <span class="impl">implementation</span> and <span class="runtime">runtime</span></h4>
+						<ol>
+							<li class="fragment fade-up api">org.apache.kafka.connect.connector.Connector </li>
+							<li class="fragment fade-up impl">io.confluent.connect.jdbc.JdbcSinkConnector</li>
+							<li class="fragment fade-up runtime">org.apache.kafka.connect.runtime.Worker</li>
+						</ol>
+						<div class="fragment fade-up summary-div credimi-color">
+							<p>Summary</p>
+							Connector provides the task class and lifecycle hooks. Workers create task instances via reflection
+						</div>
+					</section>
+					<section>
+						<h4>Tasks: <span class="api">API</span>, <span class="impl">implementation</span> and <span class="runtime">runtime</span></h4>
+						<ol>
+							<li class="fragment fade-up api">org.apache.kafka.connect.sink.SinkTask</li>
+							<li class="fragment fade-up impl">io.confluent.connect.jdbc.sink.JdbcSinkTask</li>
+							<li class="fragment fade-up runtime ">org.apache.kafka.connect.runtime.WorkerSinkTask</li>
+							<li class="fragment fade-up api">org.apache.kafka.connect.source.SourceTask</li>
+							<li class="fragment fade-up impl">io.confluent.connect.jdbc.source.JdbcSourceTask</li>
+							<li class="fragment fade-up runtime">org.apache.kafka.connect.runtime.WorkerSourceTask</li>
+							<div class="fragment fade-up summary-div credimi-color">
+								<p>Summary</p>
+								Workers create instances of WorkersourceTask / WorkerSinkTask that wraps around SourceTask/SinkTask the offset management and metrics.	
+							</div>
+
+						</ol>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>A deeper look to the runtime</h2>
+					</section>
+					<section>
+						<p>org.apache.kafka.connect.runtime.Worker</p>
+						<p class="fragment fade-up">From the worker...</p>
+						<p class="fragment fade-up">to the <span class="credimi-color">Herder</span></p>
+					</section>
+					<section>
+						<p class="fragment fade-up">org.apache.kafka.connect.runtime.Herder</p>	
+						<img src="img/herder.jpg" class="fragment"></img>
+						<p class="fragment fade-up">Distributed Herder / Standalone Herder</p>
+					</section>
+					<section>
+						<p class="fragment fade-up">org.apache.kafka.connect.runtime.Connect</p>
+						<img src="img/herder.jpg" class="fragment"></img>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Kafka Connect  and Consistency</h2>
+						<p class="fragment fade-up">Houston we have a problem</p>
+						<p class="fragment fade-up">Single records -> multiple updates?</p>
+					</section>
+					<section>
+						<h2>Looking for a solution</h2>
+						<ul>
+							<li class="fragment fade-up">Solution 1: multiple sinks on the same topic</li>
+							<li class="fragment fade-up">Solution 2: handling this challenge at the sink level</li>
+						</ul>
+						<div class="fragment">No consistency guarantees with solution 1</div>
+					</section>	
+					<section>
+						<h2>Deployment challenges</h2>
+						<p>What if you need to do for many type of records? Conflicting classpath anyone?</p>
+						<div class="fragment">Monolith anyones?</div>
+					</section>
+					<section>
+						<h2>Teh ultimate strategy</h2>
+						<div class="fragment credimi-color">Kafka Connect Distributed as a microservice</div>
+					</section>
+				</section>
 			</div>
 		</div>
-
 		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.js"></script>
-
 		<script>
 			// More info about config & dependencies:
 			// - https://github.com/hakimel/reveal.js#configuration
@@ -42,7 +196,13 @@
 					{ src: 'plugin/markdown/markdown.js' },
 					{ src: 'plugin/notes/notes.js', async: true },
 					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
+				],
+				slideNumber: true,
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				transition: 'slide' // none/fade/slide/convex/concave/zoom
 			});
 		</script>
 	</body>
